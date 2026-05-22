@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RVCE CGPA Calculator - By YASHWANTH J</title>
+    <style>
+        /* Black and Gold Theme Variables */
+        :root {
+            --primary: #FFD700; /* Gold */
+            --secondary: #DAA520; /* Darker Goldenrod for hover states */
+            --background: #000000; /* Deep Black */
+            --card-bg: rgba(26, 26, 26, 0.95); /* Slightly lighter black for cards */
+            --text: #ffffff; /* White text for readability */
+            --border: #FFD700; /* Gold borders */
+            --error: #ff4444; /* Red for errors */
+            --highlight: #4facfe; /* Vivid Blue for grades and marks */
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Here is your background photo! 
+               It looks for "rvce.jpg" in the same folder. 
+               The "rgba(0,0,0, 0.80)" creates the dark fade so it appears lightly. 
+            */
+            background: linear-gradient(rgba(0, 0, 0, 0.80), rgba(0, 0, 0, 0.80)), url('rvce.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #111111;
+            padding: 10px 20px;
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            background: none;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            visibility: hidden;
+            transition: 0.3s;
+        }
+        .back-btn:hover { background-color: var(--primary); color: #000; }
+
+        .right-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-link {
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .profile-pic {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #333;
+            overflow: hidden;
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            text-align: center;
+            color: var(--primary);
+            transition: transform 0.3s;
+        }
+        .profile-pic:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px var(--primary);
+        }
+        .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Main Containers */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 20px;
+        }
+
+        h1, h2, h3 { color: var(--primary); text-align: center; text-transform: uppercase; letter-spacing: 1px;}
+        
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.1);
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+
+        input, button.main-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 5px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background: #222222;
+            color: var(--text);
+            transition: 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 8px var(--primary);
+        }
+
+        /* Error States */
+        input.error { border: 2px solid var(--error); box-shadow: 0 0 8px var(--error); }
+        .inline-error { color: var(--error); font-weight: bold; font-size: 13px; display: none; margin-bottom: 15px; padding-left: 5px;}
+        .global-error { color: var(--error); font-weight: bold; text-align: center; display: none; margin-top: 15px; }
+
+        button.main-btn {
+            background-color: var(--primary);
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button.main-btn:hover { background-color: var(--secondary); }
+        
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .input-group { margin-bottom: 5px; }
+        .input-group label { font-weight: bold; font-size: 14px; color: var(--primary); }
+        
+        .blue-text {
+            color: var(--highlight) !important;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* Subject Buttons Grid */
+        .subject-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        .sub-btn {
+            background: #222;
+            border: 1px solid var(--primary);
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .sub-btn.active {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .results-box {
+            background: #111;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .grade-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #333;
+            padding: 10px 0;
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+        
+        .sgpa-row { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
+        .sgpa-row span { flex: 2; font-weight: bold; color: var(--primary);}
+        .sgpa-row div { flex: 1; margin: 0; }
+        .sgpa-row input { margin: 0; }
+
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button id="backBtn" class="back-btn" onclick="goBack()">&#8592; Back</button>
+        <div class="right-controls">
+            <a href="https://yashwanth-j-hacker.github.io/yashwanthj/" target="_blank" class="profile-link" title="Know more about YASHWANTH J">
+                <div class="profile-pic">
+                    <img src="me.jpg" alt="Yashwanth J" id="userPhoto">
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>RVCE CGPA Calculator</h1>
+
+        <div id="screen-cycle" class="screen active card">
+            <h2>Select Your Cycle</h2>
+            <div class="menu-grid">
+                <button class="main-btn" onclick="selectCycle('P')">P-Cycle</button>
+                <button class="main-btn" onclick="selectCycle('C')">C-Cycle</button>
+            </div>
+        </div>
+
+        <div id="screen-action" class="screen card">
+            <h2>What do you want to calculate?</h2>
+            <div class="menu-grid">
+                <button class="main-btn" onclick="loadCieScreen()">Calculate CIE Marks</button>
+                <button class="main-btn" onclick="loadSgpaScreen()">Calculate SGPA</button>
+            </div>
+        </div>
+
+        <div id="screen-cie" class="screen card">
+            <div id="subjectButtons" class="subject-nav"></div>
+            
+            <h3 id="subjectTitle">Enter Marks</h3>
+            <div id="dynamicInputs"></div>
+            
+            <button class="main-btn" onclick="calculateGrades()">Calculate Required SEE Marks</button>
+            <div id="cie-global-error" class="global-error"></div>
+            
+            <div class="results-box" id="cieResultsBox">
+                <h3>Calculation Results</h3>
+                <p><strong id="cieScaleText">Your Total CIE:</strong> <span id="cieResult" class="blue-text">0</span></p>
+                <p><em>Minimum SEE Marks required to secure following grades:</em></p>
+                <div id="gradesList"></div>
+            </div>
+        </div>
+
+        <div id="screen-sgpa" class="screen card">
+            <h2>Enter your expected grade and calculate your SGPA</h2>
+            <div id="sgpaInputs"></div>
+            
+            <button class="main-btn" onclick="calculateSgpa()">Calculate My SGPA</button>
+            <div id="sgpa-global-error" class="global-error"></div>
+
+            <div class="results-box" id="sgpaResultsBox">
+                <h3 style="text-align:center; font-size:24px;">Your Estimated SGPA: <span id="sgpaResultDisplay" class="blue-text">0.00</span></h3>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. SCREEN & NAVIGATION ---
+        let currentCycle = '';
+        let currentSubject = '';
+        let historyStack = ['screen-cycle'];
+
+        function updateBackButton() {
+            document.getElementById('backBtn').style.visibility = (historyStack.length > 1) ? 'visible' : 'hidden';
+        }
+
+        function navigate(targetScreen) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(targetScreen).classList.add('active');
+            
+            if (historyStack[historyStack.length - 1] !== targetScreen) {
+                historyStack.push(targetScreen);
+            }
+            updateBackButton();
+            
+            document.getElementById('cieResultsBox').style.display = 'none';
+            document.getElementById('sgpaResultsBox').style.display = 'none';
+            document.getElementById('cie-global-error').style.display = 'none';
+            document.getElementById('sgpa-global-error').style.display = 'none';
+        }
+
+        function goBack() {
+            if (historyStack.length > 1) {
+                historyStack.pop();
+                let prevScreen = historyStack[historyStack.length - 1];
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById(prevScreen).classList.add('active');
+            }
+            updateBackButton();
+        }
+
+        function selectCycle(cycle) {
+            currentCycle = cycle;
+            navigate('screen-action');
+        }
+
+        // --- 2. DATA CONFIGURATION ---
+        const cycleSubjects = {
+            'P': ['Physics', 'Maths', 'ESC', 'C PROGRAMMING', 'AI FOUNDATION FOR ENGINEER', 'KANNADA', 'ENGLISH', 'IDEA LAB'],
+            'C': ['CHEMISTRY', 'Maths', 'ESC', 'CAEG', 'PLC', 'YOGA', 'ENGLISH', 'constitution']
+        };
+
+        const config = {
+            'Physics': { type: 'theory_lab', seeMax: 150, passDesc: "Min 40 from Theory, 20 from Lab" },
+            'CHEMISTRY': { type: 'theory_lab', seeMax: 150, passDesc: "Min 40 from Theory, 20 from Lab" },
+            'C PROGRAMMING': { type: 'theory_lab', seeMax: 150, passDesc: "Min 40 from Theory, 20 from Lab" },
+            'PLC': { type: 'theory_lab', seeMax: 150, passDesc: "Min 40 from Theory, 20 from Lab" },
+            'ESC': { type: 'theory_only', seeMax: 100, passDesc: "Min 40 from Theory" },
+            'AI FOUNDATION FOR ENGINEER': { type: 'ai_foundation', seeMax: 100, passDesc: "Min 40 from Theory" },
+            'Maths': { type: 'maths', seeMax: 100, passDesc: "Min 40 from Theory" },
+            'CAEG': { type: 'caeg', seeMax: 50, passDesc: "Min 20 from Theory/Lab" },
+            'YOGA': { type: 'yoga', seeMax: 50, passDesc: "Min 20" },
+            'constitution': { type: 'constitution', seeMax: 50, passDesc: "Min 20" },
+            'ENGLISH': { type: 'english', seeMax: 50, passDesc: "Min 20" },
+            'KANNADA': { type: 'kannada', seeMax: 50, passDesc: "Min 20" },
+            'IDEA LAB': { type: 'idealab', seeMax: 50, passDesc: "Min 20" }
+        };
+
+        const sgpaCredits = {
+            'Physics': 4, 'CHEMISTRY': 4, 'Maths': 4,
+            'ESC': 3, 'C PROGRAMMING': 3, 'AI FOUNDATION FOR ENGINEER': 3, 'CAEG': 3, 'PLC': 3,
+            'KANNADA': 1, 'ENGLISH': 1, 'IDEA LAB': 1, 'YOGA': 1, 'constitution': 1
+        };
+
+        // --- 3. CIE CALCULATOR LOGIC ---
+        function loadCieScreen() {
+            navigate('screen-cie');
+            const container = document.getElementById('subjectButtons');
+            container.innerHTML = '';
+            
+            let firstSub = null;
+            cycleSubjects[currentCycle].forEach(sub => {
+                if(!firstSub) firstSub = sub;
+                let btn = document.createElement('button');
+                btn.className = 'sub-btn';
+                btn.innerText = sub;
+                btn.onclick = () => {
+                    document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentSubject = sub;
+                    loadCieInputs();
+                };
+                container.appendChild(btn);
+            });
+
+            container.firstChild.classList.add('active');
+            currentSubject = firstSub;
+            loadCieInputs();
+        }
+
+        function handleInput(el, maxVal, inputId) {
+            let errorDiv = document.getElementById(`error-${inputId}`);
+            let val = el.value;
+            
+            if (/[^0-9]/.test(val)) {
+                el.value = val.replace(/[^0-9]/g, '');
+                errorDiv.innerText = "Letters strictly not allowed.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            let num = parseInt(el.value);
+            if (!isNaN(num) && num > maxVal) {
+                el.classList.add('error');
+                errorDiv.innerText = `Marks cannot exceed ${maxVal}!`;
+                errorDiv.style.display = 'block';
+            } else {
+                el.classList.remove('error');
+                errorDiv.style.display = 'none';
+            }
+        }
+
+        function createInput(id, label, max) {
+            return `
+                <div class="input-group">
+                    <label>${label} (Max: ${max})</label>
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" id="${id}" 
+                           oninput="handleInput(this, ${max}, '${id}')" 
+                           placeholder="Enter marks out of ${max}"
+                           class="cie-input">
+                    <div id="error-${id}" class="inline-error"></div>
+                </div>
+            `;
+        }
+
+        function loadCieInputs() {
+            document.getElementById('cieResultsBox').style.display = 'none';
+            document.getElementById('cie-global-error').style.display = 'none';
+            document.getElementById('subjectTitle').innerText = `Enter Marks for ${currentSubject}`;
+            
+            const type = config[currentSubject].type;
+            const dynamic = document.getElementById('dynamicInputs');
+            let html = '';
+
+            if (type === 'theory_lab') {
+                html += createInput('t1', 'Written Test 1', 50);
+                html += createInput('t2', 'Written Test 2', 50);
+                html += createInput('q1', 'Quiz 1', 10);
+                html += createInput('q2', 'Quiz 2', 10);
+                html += createInput('el', 'Sem Project/EL', 140);
+                html += createInput('lab', 'Lab Component', 50);
+            } else if (type === 'theory_only') {
+                html += createInput('t1', 'Written Test 1', 50);
+                html += createInput('t2', 'Written Test 2', 50);
+                html += createInput('q1', 'Quiz 1', 10);
+                html += createInput('q2', 'Quiz 2', 10);
+                html += createInput('el', 'Sem Project/EL', 140);
+            } else if (type === 'ai_foundation') {
+                html += createInput('t1', 'Written Test 1', 50);
+                html += createInput('t2', 'Written Test 2', 50);
+                html += createInput('q1', 'Quiz 1', 10);
+                html += createInput('q2', 'Quiz 2', 10);
+                html += createInput('el', 'EL OF AI FOUNDATION', 40);
+            } else if (type === 'maths') {
+                html += createInput('t1', 'Written Test 1', 50);
+                html += createInput('t2', 'Written Test 2', 50);
+                html += createInput('q1', 'Quiz 1', 10);
+                html += createInput('q2', 'Quiz 2', 10);
+                html += createInput('el', 'Sem Project/EL', 140);
+                html += createInput('matlab', 'Matlab Exam', 20);
+            } else if (type === 'caeg') {
+                html += createInput('t1', 'Written Test', 50);
+                html += createInput('lab', 'Lab Exam', 20);
+                html += createInput('el', 'EL OF CAEG', 10);
+                html += createInput('manual', 'Manual Book', 20);
+            } else if (type === 'yoga') {
+                html += createInput('demo', 'Demonstration Test', 50);
+                html += createInput('quiz', 'Quiz', 12);
+                html += createInput('el', 'EL OF YOGA', 10);
+            } else if (type === 'constitution') {
+                html += createInput('t1', 'Written Test 1', 50);
+                html += createInput('t2', 'Written Test 2', 50);
+                html += createInput('q1', 'Quiz 1', 10);
+                html += createInput('q2', 'Quiz 2', 10);
+                html += createInput('el', 'EL OF CONSTITUTION', 20);
+            } else if (type === 'english') {
+                html += createInput('modules', 'Modules on STEP (out of 10)', 10);
+                html += createInput('t1', 'Written Test 1', 50);
+                html += createInput('t2', 'Written Test 2', 50);
+                html += createInput('el', 'EL OF ENGLISH', 20);
+            } else if (type === 'kannada') {
+                html += createInput('cie1', 'CIE 1', 25);
+                html += createInput('cie2', 'CIE 2', 25);
+                html += createInput('q1', 'Quiz 1', 10);
+                html += createInput('q2', 'Quiz 2', 10);
+                html += createInput('el', 'EL OF KANNADA', 20);
+            } else if (type === 'idealab') {
+                html += createInput('manual', 'Manual Submission', 20);
+                html += createInput('lab', 'Lab CIE', 25);
+                html += createInput('el', 'EL OF IDEA LAB', 20);
+            }
+
+            dynamic.innerHTML = html;
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                const activeScreen = document.querySelector('.screen.active');
+                if(!activeScreen) return;
+                
+                const inputs = Array.from(activeScreen.querySelectorAll('input'));
+                const index = inputs.indexOf(e.target);
+                
+                if (index > -1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                } else if (index === inputs.length - 1) {
+                    if(activeScreen.id === 'screen-cie') calculateGrades();
+                    if(activeScreen.id === 'screen-sgpa') calculateSgpa();
+                }
+            }
+        });
+
+        function getVal(id) {
+            return parseFloat(document.getElementById(id)?.value) || 0;
+        }
+
+        function calculateGrades() {
+            let globalError = document.getElementById('cie-global-error');
+            if(document.querySelector('.cie-input.error')) {
+                globalError.innerText = "Please fix the red boxes before calculating!";
+                globalError.style.display = 'block';
+                return;
+            }
+
+            const type = config[currentSubject].type;
+            let cieTotal = 0;
+            let maxCie = 100;
+
+            if (type === 'theory_lab') {
+                maxCie = 150;
+                cieTotal = Math.ceil((getVal('t1') + getVal('t2')) * 0.4) + getVal('q1') + getVal('q2') + Math.ceil(getVal('el') * (40/140)) + getVal('lab');
+            } else if (type === 'theory_only') {
+                maxCie = 100;
+                cieTotal = Math.ceil((getVal('t1') + getVal('t2')) * 0.4) + getVal('q1') + getVal('q2') + Math.ceil(getVal('el') * (40/140));
+            } else if (type === 'ai_foundation') {
+                maxCie = 100;
+                cieTotal = Math.ceil((getVal('t1') + getVal('t2')) * 0.4) + getVal('q1') + getVal('q2') + getVal('el');
+            } else if (type === 'maths') {
+                maxCie = 100;
+                cieTotal = Math.ceil((getVal('t1') + getVal('t2')) * 0.4) + getVal('q1') + getVal('q2') + Math.ceil(getVal('el') * (20/140)) + getVal('matlab');
+            } else if (type === 'caeg') {
+                maxCie = 50;
+                cieTotal = Math.ceil(getVal('t1') * 0.2) + Math.ceil(getVal('lab') * 0.5) + getVal('el') + getVal('manual');
+            } else if (type === 'yoga') {
+                maxCie = 50;
+                cieTotal = Math.ceil(getVal('demo') * 0.6) + Math.ceil(getVal('quiz') * (10/12)) + getVal('el');
+            } else if (type === 'constitution') {
+                maxCie = 50;
+                cieTotal = Math.ceil((getVal('t1') + getVal('t2')) * 0.2) + Math.ceil((getVal('q1') + getVal('q2')) / 2) + getVal('el');
+            } else if (type === 'english') {
+                maxCie = 50;
+                cieTotal = getVal('modules') + Math.ceil((getVal('t1') + getVal('t2')) * 0.2) + getVal('el');
+            } else if (type === 'kannada') {
+                maxCie = 50;
+                cieTotal = Math.ceil((getVal('cie1') + getVal('cie2')) * 0.4) + Math.ceil((getVal('q1') + getVal('q2')) * 0.5) + getVal('el');
+            } else if (type === 'idealab') {
+                maxCie = 50;
+                cieTotal = getVal('manual') + Math.ceil(getVal('lab') * 0.4) + getVal('el');
+            }
+
+            if (cieTotal > maxCie) cieTotal = maxCie;
+
+            // Display logic shows the exact scaling (150/100/50) based on weightage
+            document.getElementById('cieScaleText').innerText = `Your Total CIE (Out of ${maxCie}):`;
+            document.getElementById('cieResult').innerText = cieTotal;
+
+            let cieOutOf50 = Math.ceil((cieTotal / maxCie) * 50);
+            
+            const targetGrades = [
+                { grade: 'O (10 pts)', target: 90 },
+                { grade: 'A+ (9 pts)', target: 80 },
+                { grade: 'A (8 pts)', target: 70 },
+                { grade: 'B+ (7 pts)', target: 60 },
+                { grade: 'B (6 pts)', target: 55 },
+                { grade: 'C+ (5 pts)', target: 50 },
+                { grade: 'C (4 pts)', target: 40 }
+            ];
+
+            const seeMax = config[currentSubject].seeMax;
+            let minSeePass = Math.ceil(seeMax * 0.4); 
+            if(type === 'theory_lab') minSeePass = 60; 
+
+            let resultsHtml = '';
+            targetGrades.forEach(g => {
+                let neededSeeForGrade = Math.ceil((g.target - cieOutOf50) * (seeMax / 50));
+                let displayText = '';
+
+                if (neededSeeForGrade > seeMax) {
+                    displayText = `<span class="inline-error" style="display:inline;">Not Possible</span>`;
+                } else if (neededSeeForGrade <= minSeePass) {
+                    displayText = `<strong class="blue-text">${minSeePass}</strong> (Logically <span class="blue-text">${Math.max(neededSeeForGrade, 0)}</span>, but you MUST score <span class="blue-text">${minSeePass}</span> to pass. ${config[currentSubject].passDesc})`;
+                } else {
+                    displayText = `<strong class="blue-text">${neededSeeForGrade}</strong>`;
+                }
+
+                resultsHtml += `
+                    <div class="grade-row">
+                        <span>Grade ${g.grade}</span>
+                        <span>${displayText}</span>
+                    </div>
+                `;
+            });
+
+            document.getElementById('gradesList').innerHTML = resultsHtml;
+            document.getElementById('cieResultsBox').style.display = 'block';
+            globalError.style.display = 'none';
+        }
+
+        // --- 4. SGPA CALCULATOR LOGIC ---
+        function handleSgpaInput(el, subjectId) {
+            let errorDiv = document.getElementById(`error-sgpa-${subjectId}`);
+            let val = el.value;
+            
+            if (/[^0-9]/.test(val)) {
+                el.value = val.replace(/[^0-9]/g, '');
+                errorDiv.innerText = "Letters strictly not allowed.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            let num = parseInt(el.value);
+            if (!isNaN(num) && num > 10) {
+                el.classList.add('error');
+                errorDiv.innerText = "Grade cannot exceed 10!";
+                errorDiv.style.display = 'block';
+            } else {
+                el.classList.remove('error');
+                errorDiv.style.display = 'none';
+            }
+        }
+
+        function loadSgpaScreen() {
+            navigate('screen-sgpa');
+            const container = document.getElementById('sgpaInputs');
+            container.innerHTML = '';
+            
+            cycleSubjects[currentCycle].forEach((sub, index) => {
+                let creditVal = sgpaCredits[sub];
+                let rowHtml = `
+                    <div class="sgpa-row-container" style="margin-bottom: 10px;">
+                        <div class="sgpa-row">
+                            <span>${sub} (${creditVal} Cr)</span>
+                            <div>
+                                <input type="text" inputmode="numeric" pattern="[0-9]*" class="sgpa-grade-input" data-credits="${creditVal}" placeholder="e.g. 9" oninput="handleSgpaInput(this, ${index})">
+                            </div>
+                        </div>
+                        <div id="error-sgpa-${index}" class="inline-error" style="text-align: right; margin-bottom: 0;"></div>
+                    </div>
+                `;
+                container.innerHTML += rowHtml;
+            });
+        }
+
+        function calculateSgpa() {
+            let globalError = document.getElementById('sgpa-global-error');
+            if(document.querySelector('.sgpa-grade-input.error')) {
+                globalError.innerText = "Please fix the red boxes before calculating!";
+                globalError.style.display = 'block';
+                return;
+            }
+
+            const inputs = document.querySelectorAll('.sgpa-grade-input');
+            let totalCredits = 0;
+            let totalPoints = 0;
+
+            inputs.forEach(input => {
+                let credits = parseInt(input.getAttribute('data-credits'));
+                let gradePoints = parseInt(input.value) || 0; 
+                
+                totalCredits += credits;
+                totalPoints += (credits * gradePoints);
+            });
+
+            if(totalCredits === 0) return;
+
+            let sgpa = (totalPoints / totalCredits).toFixed(2);
+            let displayElement = document.getElementById('sgpaResultDisplay');
+            displayElement.innerText = sgpa;
+            
+            document.getElementById('sgpaResultsBox').style.display = 'block';
+            
+            displayElement.className = 'blue-text';
+            if (sgpa < 5.0) {
+                displayElement.style.color = 'var(--error)';
+            } else {
+                displayElement.style.color = 'var(--highlight)';
+            }
+            
+            globalError.style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>
