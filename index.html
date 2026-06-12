@@ -265,7 +265,7 @@
         <div class="right-controls">
             <a href="https://yashwanth-j-hacker.github.io/yashwanthj/" target="_blank" class="profile-link" title="Know more about YASHWANTH J">
                 <div class="profile-pic">
-                    <img src="me.jpg" alt="Yashwanth J" id="userPhoto">
+                    <img src="me.jpeg" alt="Yashwanth J" id="userPhoto">
                 </div>
             </a>
         </div>
@@ -520,7 +520,7 @@
             } else if (type === 'idealab') {
                 html += createInput('manual', 'Manual Submission', 20);
                 html += createInput('lab', 'Lab EL', 20);
-                html += createInput('quiz', 'Quiz', 20); // Explicitly set Max: 20
+                html += createInput('quiz', 'Quiz', 20);
             }
 
             dynamic.innerHTML = html;
@@ -588,7 +588,6 @@
                 cieTotal = Math.ceil((getVal('cie1') + getVal('cie2')) * 0.4) + Math.ceil((getVal('q1') + getVal('q2')) * 0.5) + getVal('el');
             } else if (type === 'idealab') {
                 maxCie = 50;
-                // New scaling: Manual (20) + Lab EL for 20 added directly + Quiz scaled from 20 down to 10 (20 * 0.5 = 10)
                 cieTotal = getVal('manual') + getVal('lab') + Math.ceil(getVal('quiz') * 0.5);
             }
 
