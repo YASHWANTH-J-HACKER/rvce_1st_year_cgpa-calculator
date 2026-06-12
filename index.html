@@ -19,10 +19,6 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* Here is your background photo! 
-               It looks for "rvce.jpg" in the same folder. 
-               The "rgba(0,0,0, 0.80)" creates the dark fade so it appears lightly. 
-            */
             background: linear-gradient(rgba(0, 0, 0, 0.80), rgba(0, 0, 0, 0.80)), url('rvce.jpg') no-repeat center center fixed;
             background-size: cover;
             color: var(--text);
@@ -37,7 +33,7 @@
             justify-content: space-between;
             align-items: center;
             background-color: #111111;
-            padding: 10px 20px;
+            padding: 10px 15px;
             border-bottom: 2px solid var(--primary);
             margin-bottom: 20px;
         }
@@ -46,12 +42,13 @@
             background: none;
             border: 2px solid var(--primary);
             color: var(--primary);
-            padding: 5px 15px;
+            padding: 6px 12px;
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
             visibility: hidden;
             transition: 0.3s;
+            font-size: 14px;
         }
         .back-btn:hover { background-color: var(--primary); color: #000; }
 
@@ -67,8 +64,8 @@
         }
 
         .profile-pic {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             background-color: #333;
             overflow: hidden;
@@ -91,18 +88,29 @@
         .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 0 20px 20px;
+            padding: 0 15px 20px;
+            box-sizing: border-box;
         }
 
-        h1, h2, h3 { color: var(--primary); text-align: center; text-transform: uppercase; letter-spacing: 1px;}
+        h1 { 
+            color: var(--primary); 
+            text-align: center; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+        h2 { font-size: 1.4rem; color: var(--primary); text-align: center; text-transform: uppercase;}
+        h3 { font-size: 1.2rem; color: var(--primary); text-align: center; text-transform: uppercase;}
         
         .card {
             background: var(--card-bg);
-            padding: 25px;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.1);
             margin-bottom: 20px;
             border: 1px solid #333;
+            box-sizing: border-box;
         }
 
         input, button.main-btn {
@@ -125,8 +133,8 @@
 
         /* Error States */
         input.error { border: 2px solid var(--error); box-shadow: 0 0 8px var(--error); }
-        .inline-error { color: var(--error); font-weight: bold; font-size: 13px; display: none; margin-bottom: 15px; padding-left: 5px;}
-        .global-error { color: var(--error); font-weight: bold; text-align: center; display: none; margin-top: 15px; }
+        .inline-error { color: var(--error); font-weight: bold; font-size: 13px; display: none; margin-bottom: 12px; padding-left: 5px;}
+        .global-error { color: var(--error); font-weight: bold; text-align: center; display: none; margin-top: 15px; padding: 0 5px; }
 
         button.main-btn {
             background-color: var(--primary);
@@ -134,13 +142,17 @@
             font-weight: bold;
             cursor: pointer;
             border: none;
-            margin-top: 20px;
+            margin-top: 15px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
         button.main-btn:hover { background-color: var(--secondary); }
         
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .menu-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+        }
         .input-group { margin-bottom: 5px; }
         .input-group label { font-weight: bold; font-size: 14px; color: var(--primary); }
         
@@ -158,6 +170,7 @@
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 1px solid #333;
+            justify-content: center;
         }
         .sub-btn {
             background: #222;
@@ -166,7 +179,7 @@
             padding: 8px 14px;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             transition: 0.2s;
         }
@@ -182,22 +195,66 @@
             margin-top: 20px;
             display: none;
             border-radius: 0 10px 10px 0;
+            box-sizing: border-box;
         }
         
         .grade-row {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid #333;
             padding: 10px 0;
+            gap: 10px;
+        }
+        .grade-row span:last-child {
+            text-align: right;
         }
 
         .screen { display: none; }
         .screen.active { display: block; }
         
-        .sgpa-row { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
-        .sgpa-row span { flex: 2; font-weight: bold; color: var(--primary);}
-        .sgpa-row div { flex: 1; margin: 0; }
-        .sgpa-row input { margin: 0; }
+        .sgpa-row-container {
+            border-bottom: 1px solid #222;
+            padding-bottom: 8px;
+        }
+        .sgpa-row { 
+            display: flex; 
+            gap: 15px; 
+            align-items: center; 
+            margin-bottom: 5px; 
+            justify-content: space-between;
+        }
+        .sgpa-row span { flex: 2; font-weight: bold; color: var(--primary); font-size: 14px; word-break: break-word;}
+        .sgpa-row div { flex: 1; min-width: 80px; margin: 0; }
+        .sgpa-row input { margin: 0; padding: 8px; font-size: 15px;}
+
+        /* Responsive Breakpoints */
+        @media (max-width: 600px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.2rem; }
+            .card { padding: 15px; }
+            .sub-btn { padding: 6px 12px; font-size: 12px; }
+            .grade-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            .grade-row span:last-child {
+                text-align: left;
+            }
+            .sgpa-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            .sgpa-row div {
+                width: 100%;
+            }
+        }
 
     </style>
 </head>
@@ -362,14 +419,21 @@
             let errorDiv = document.getElementById(`error-${inputId}`);
             let val = el.value;
             
-            if (/[^0-9]/.test(val)) {
-                el.value = val.replace(/[^0-9]/g, '');
+            // Allow numbers and a single decimal point
+            if (/[^0-9.]/.test(val)) {
+                el.value = val.replace(/[^0-9.]/g, '');
                 errorDiv.innerText = "Letters strictly not allowed.";
                 errorDiv.style.display = 'block';
                 return;
             }
             
-            let num = parseInt(el.value);
+            // Prevent multiple decimal points
+            if ((val.match(/\./g) || []).length > 1) {
+                el.value = val.substring(0, val.lastIndexOf('.'));
+                return;
+            }
+
+            let num = parseFloat(el.value);
             if (!isNaN(num) && num > maxVal) {
                 el.classList.add('error');
                 errorDiv.innerText = `Marks cannot exceed ${maxVal}!`;
@@ -384,9 +448,8 @@
             return `
                 <div class="input-group">
                     <label>${label} (Max: ${max})</label>
-                    <input type="text" inputmode="numeric" pattern="[0-9]*" id="${id}" 
+                    <input type="text" inputmode="decimal" placeholder="Enter marks out of ${max}" id="${id}" 
                            oninput="handleInput(this, ${max}, '${id}')" 
-                           placeholder="Enter marks out of ${max}"
                            class="cie-input">
                     <div id="error-${id}" class="inline-error"></div>
                 </div>
@@ -456,8 +519,8 @@
                 html += createInput('el', 'EL OF KANNADA', 20);
             } else if (type === 'idealab') {
                 html += createInput('manual', 'Manual Submission', 20);
-                html += createInput('lab', 'Lab CIE', 25);
-                html += createInput('el', 'EL OF IDEA LAB', 20);
+                html += createInput('lab', 'Lab EL', 20);
+                html += createInput('quiz', 'Quiz', 20); // Explicitly set Max: 20
             }
 
             dynamic.innerHTML = html;
@@ -525,14 +588,14 @@
                 cieTotal = Math.ceil((getVal('cie1') + getVal('cie2')) * 0.4) + Math.ceil((getVal('q1') + getVal('q2')) * 0.5) + getVal('el');
             } else if (type === 'idealab') {
                 maxCie = 50;
-                cieTotal = getVal('manual') + Math.ceil(getVal('lab') * 0.4) + getVal('el');
+                // New scaling: Manual (20) + Lab EL for 20 added directly + Quiz scaled from 20 down to 10 (20 * 0.5 = 10)
+                cieTotal = getVal('manual') + getVal('lab') + Math.ceil(getVal('quiz') * 0.5);
             }
 
             if (cieTotal > maxCie) cieTotal = maxCie;
 
-            // Display logic shows the exact scaling (150/100/50) based on weightage
             document.getElementById('cieScaleText').innerText = `Your Total CIE (Out of ${maxCie}):`;
-            document.getElementById('cieResult').innerText = cieTotal;
+            document.getElementById('cieResult').innerText = cieTotal.toFixed(1).replace(/\.0$/, '');
 
             let cieOutOf50 = Math.ceil((cieTotal / maxCie) * 50);
             
@@ -551,16 +614,21 @@
             if(type === 'theory_lab') minSeePass = 60; 
 
             let resultsHtml = '';
-            targetGrades.forEach(g => {
+            let reachedPassingFloor = false;
+
+            for (let g of targetGrades) {
+                if (reachedPassingFloor) continue;
+
                 let neededSeeForGrade = Math.ceil((g.target - cieOutOf50) * (seeMax / 50));
                 let displayText = '';
 
                 if (neededSeeForGrade > seeMax) {
                     displayText = `<span class="inline-error" style="display:inline;">Not Possible</span>`;
                 } else if (neededSeeForGrade <= minSeePass) {
-                    displayText = `<strong class="blue-text">${minSeePass}</strong> (Logically <span class="blue-text">${Math.max(neededSeeForGrade, 0)}</span>, but you MUST score <span class="blue-text">${minSeePass}</span> to pass. ${config[currentSubject].passDesc})`;
+                    displayText = `Score <strong class="blue-text">${minSeePass}</strong> to pass. <span style="color: #aaa; font-size: 0.9em;">(Even if you just bare-minimum clear the exam with ${minSeePass} marks, you secure this grade. This is your minimum possible grade!)</span>`;
+                    reachedPassingFloor = true;
                 } else {
-                    displayText = `<strong class="blue-text">${neededSeeForGrade}</strong>`;
+                    displayText = `Score <strong class="blue-text">${neededSeeForGrade}</strong>`;
                 }
 
                 resultsHtml += `
@@ -569,7 +637,7 @@
                         <span>${displayText}</span>
                     </div>
                 `;
-            });
+            }
 
             document.getElementById('gradesList').innerHTML = resultsHtml;
             document.getElementById('cieResultsBox').style.display = 'block';
@@ -581,14 +649,19 @@
             let errorDiv = document.getElementById(`error-sgpa-${subjectId}`);
             let val = el.value;
             
-            if (/[^0-9]/.test(val)) {
-                el.value = val.replace(/[^0-9]/g, '');
+            if (/[^0-9.]/.test(val)) {
+                el.value = val.replace(/[^0-9.]/g, '');
                 errorDiv.innerText = "Letters strictly not allowed.";
                 errorDiv.style.display = 'block';
                 return;
             }
+
+            if ((val.match(/\./g) || []).length > 1) {
+                el.value = val.substring(0, val.lastIndexOf('.'));
+                return;
+            }
             
-            let num = parseInt(el.value);
+            let num = parseFloat(el.value);
             if (!isNaN(num) && num > 10) {
                 el.classList.add('error');
                 errorDiv.innerText = "Grade cannot exceed 10!";
@@ -607,11 +680,11 @@
             cycleSubjects[currentCycle].forEach((sub, index) => {
                 let creditVal = sgpaCredits[sub];
                 let rowHtml = `
-                    <div class="sgpa-row-container" style="margin-bottom: 10px;">
+                    <div class="sgpa-row-container">
                         <div class="sgpa-row">
                             <span>${sub} (${creditVal} Cr)</span>
                             <div>
-                                <input type="text" inputmode="numeric" pattern="[0-9]*" class="sgpa-grade-input" data-credits="${creditVal}" placeholder="e.g. 9" oninput="handleSgpaInput(this, ${index})">
+                                <input type="text" inputmode="decimal" class="sgpa-grade-input" data-credits="${creditVal}" placeholder="e.g. 9" oninput="handleSgpaInput(this, ${index})">
                             </div>
                         </div>
                         <div id="error-sgpa-${index}" class="inline-error" style="text-align: right; margin-bottom: 0;"></div>
@@ -635,7 +708,7 @@
 
             inputs.forEach(input => {
                 let credits = parseInt(input.getAttribute('data-credits'));
-                let gradePoints = parseInt(input.value) || 0; 
+                let gradePoints = parseFloat(input.value) || 0; 
                 
                 totalCredits += credits;
                 totalPoints += (credits * gradePoints);
@@ -650,7 +723,7 @@
             document.getElementById('sgpaResultsBox').style.display = 'block';
             
             displayElement.className = 'blue-text';
-            if (sgpa < 5.0) {
+            if (parseFloat(sgpa) < 5.0) {
                 displayElement.style.color = 'var(--error)';
             } else {
                 displayElement.style.color = 'var(--highlight)';
