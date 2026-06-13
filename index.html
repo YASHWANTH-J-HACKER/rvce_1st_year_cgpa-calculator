@@ -142,7 +142,7 @@
             box-sizing: border-box;
         }
 
-        input, button.main-btn {
+        input, select, button.main-btn {
             width: 100%;
             padding: 12px;
             margin: 8px 0 5px;
@@ -155,7 +155,7 @@
             transition: 0.3s;
         }
         
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             box-shadow: 0 0 8px var(--primary);
         }
@@ -265,8 +265,8 @@
             justify-content: space-between;
         }
         .sgpa-row span { flex: 2; font-weight: bold; color: var(--primary); font-size: 14px; word-break: break-word;}
-        .sgpa-row div { flex: 1; min-width: 100px; margin: 0; }
-        .sgpa-row input { margin: 0; padding: 8px; font-size: 15px; text-transform: uppercase;}
+        .sgpa-row div { flex: 1.2; min-width: 130px; margin: 0; }
+        .sgpa-row select { margin: 0; padding: 8px; font-size: 15px; cursor: pointer;}
 
         /* Responsive Breakpoints */
         @media (max-width: 600px) {
@@ -355,7 +355,7 @@
         </div>
 
         <div id="screen-sgpa" class="screen card">
-            <h2>Enter your expected grade (O, A+, A...) or grade point (10, 9, 8...)</h2>
+            <h2>Select your expected grade for each subject</h2>
             <div id="sgpaInputs"></div>
             
             <button class="main-btn" onclick="calculateSgpa()">Calculate My SGPA</button>
@@ -436,9 +436,9 @@
             'KANNADA': 1, 'ENGLISH': 1, 'IDEA LAB': 1, 'YOGA': 1, 'constitution': 1
         };
 
-        // Letter Grade to Grade Points Mapping
+        // Grade mapping optimized to process dropdown state values
         const gradeMap = {
-            'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C+': 5, 'C': 4, 'F': 0
+            'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'P': 4, 'F': 0
         };
 
         // --- 3. CIE CALCULATOR LOGIC ---
@@ -670,8 +670,8 @@
                 { grade: 'A (8 pts)', target: 70 },
                 { grade: 'B+ (7 pts)', target: 60 },
                 { grade: 'B (6 pts)', target: 55 },
-                { grade: 'C+ (5 pts)', target: 50 },
-                { grade: 'C (4 pts)', target: 40 }
+                { grade: 'C (5 pts)', target: 50 },
+                { grade: 'P (4 pts)', target: 40 }
             ];
 
             const seeMax = config[currentSubject].seeMax;
@@ -710,44 +710,6 @@
         }
 
         // --- 4. SGPA CALCULATOR LOGIC ---
-        function handleSgpaInput(el, subjectId) {
-            let errorDiv = document.getElementById(`error-sgpa-${subjectId}`);
-            
-            // Strictly block decimal points from ever being registered in the input box string
-            if (el.value.includes('.')) {
-                el.value = el.value.replace(/\./g, '');
-            }
-
-            let val = el.value.trim().toUpperCase();
-            
-            if (val === '') {
-                el.classList.remove('error');
-                errorDiv.style.display = 'none';
-                calculateSgpaDynamic();
-                return;
-            }
-
-            if (gradeMap.hasOwnProperty(val)) {
-                el.classList.remove('error');
-                errorDiv.style.display = 'none';
-            } else {
-                let num = parseInt(val, 10);
-                // Ensure it is a valid base-10 integer between 0 and 10 with no decimal formatting leakage
-                if (!isNaN(num) && num >= 0 && num <= 10 && String(num) === val) {
-                    el.classList.remove('error');
-                    errorDiv.style.display = 'none';
-                } else {
-                    el.classList.add('error');
-                    errorDiv.innerText = "Enter valid letter grade (O, A+, A...) or integer points (0-10)!";
-                    errorDiv.style.display = 'block';
-                    document.getElementById('sgpaResultsBox').style.display = 'none';
-                    return;
-                }
-            }
-
-            calculateSgpaDynamic();
-        }
-
         function loadSgpaScreen() {
             navigate('screen-sgpa');
             const container = document.getElementById('sgpaInputs');
@@ -760,10 +722,19 @@
                         <div class="sgpa-row">
                             <span>${sub} (${creditVal} Cr)</span>
                             <div>
-                                <input type="text" class="sgpa-grade-input" data-credits="${creditVal}" placeholder="e.g. A+ or 9" oninput="handleSgpaInput(this, ${index})">
+                                <select class="sgpa-grade-input" data-credits="${creditVal}" onchange="calculateSgpaDynamic()">
+                                    <option value="">Select Grade</option>
+                                    <option value="O">O (10)</option>
+                                    <option value="A+">A+ (9)</option>
+                                    <option value="A">A (8)</option>
+                                    <option value="B+">B+ (7)</option>
+                                    <option value="B">B (6)</option>
+                                    <option value="C">C (5)</option>
+                                    <option value="P">P (4)</option>
+                                    <option value="F">F (0)</option>
+                                </select>
                             </div>
                         </div>
-                        <div id="error-sgpa-${index}" class="inline-error" style="text-align: right; margin-bottom: 0;"></div>
                     </div>
                 `;
                 container.innerHTML += rowHtml;
@@ -771,20 +742,18 @@
         }
 
         function calculateSgpaDynamic() {
-            if(document.querySelector('.sgpa-grade-input.error')) return;
-
             const inputs = document.querySelectorAll('.sgpa-grade-input');
             let totalCredits = 0;
             let totalPoints = 0;
             let enteredFieldsCount = 0;
 
             inputs.forEach(input => {
-                let val = input.value.trim().toUpperCase();
+                let val = input.value;
                 if (val === '') return;
 
                 enteredFieldsCount++;
                 let credits = parseInt(input.getAttribute('data-credits'));
-                let gradePoints = gradeMap.hasOwnProperty(val) ? gradeMap[val] : (parseInt(val, 10) || 0);
+                let gradePoints = gradeMap[val];
                 
                 totalCredits += credits;
                 totalPoints += (credits * gradePoints);
@@ -810,21 +779,15 @@
 
         function calculateSgpa() {
             let globalError = document.getElementById('sgpa-global-error');
-            if(document.querySelector('.sgpa-grade-input.error')) {
-                globalError.innerText = "Please fix the red boxes before calculating!";
-                globalError.style.display = 'block';
-                return;
-            }
-
             const inputs = document.querySelectorAll('.sgpa-grade-input');
             let hasEmptyFields = false;
 
             inputs.forEach(input => {
-                if (input.value.trim() === '') hasEmptyFields = true;
+                if (input.value === '') hasEmptyFields = true;
             });
 
             if (hasEmptyFields) {
-                globalError.innerText = "Please fill in all the grade fields!";
+                globalError.innerText = "Please select a grade for all fields!";
                 globalError.style.display = 'block';
                 return;
             }
