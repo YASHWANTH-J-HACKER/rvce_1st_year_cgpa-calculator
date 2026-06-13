@@ -110,7 +110,7 @@
             width: 100%; 
             height: 100%; 
             object-fit: cover; 
-            object-position: center top; /* Centers the face within the frame */
+            object-position: center top;
         }
 
         /* Main Containers */
@@ -254,8 +254,8 @@
             justify-content: space-between;
         }
         .sgpa-row span { flex: 2; font-weight: bold; color: var(--primary); font-size: 14px; word-break: break-word;}
-        .sgpa-row div { flex: 1; min-width: 80px; margin: 0; }
-        .sgpa-row input { margin: 0; padding: 8px; font-size: 15px;}
+        .sgpa-row div { flex: 1; min-width: 100px; margin: 0; }
+        .sgpa-row input { margin: 0; padding: 8px; font-size: 15px; text-transform: uppercase;}
 
         /* Responsive Breakpoints */
         @media (max-width: 600px) {
@@ -341,7 +341,7 @@
         </div>
 
         <div id="screen-sgpa" class="screen card">
-            <h2>Enter your expected grade and calculate your SGPA</h2>
+            <h2>Enter your expected grade (O, A+, A...) or grade point (10, 9, 8...)</h2>
             <div id="sgpaInputs"></div>
             
             <button class="main-btn" onclick="calculateSgpa()">Calculate My SGPA</button>
@@ -422,6 +422,11 @@
             'KANNADA': 1, 'ENGLISH': 1, 'IDEA LAB': 1, 'YOGA': 1, 'constitution': 1
         };
 
+        // Letter Grade to Grade Points Mapping
+        const gradeMap = {
+            'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C+': 5, 'C': 4, 'F': 0
+        };
+
         // --- 3. CIE CALCULATOR LOGIC ---
         function loadCieScreen() {
             navigate('screen-cie');
@@ -452,7 +457,6 @@
             let errorDiv = document.getElementById(`error-${inputId}`);
             let val = el.value;
             
-            // Clean non-numeric characters except decimal points
             if (/[^0-9.]/.test(val)) {
                 el.value = val.replace(/[^0-9.]/g, '');
                 errorDiv.innerText = "Letters strictly not allowed.";
@@ -460,13 +464,11 @@
                 return;
             }
             
-            // Avoid stacked decimal points
             if ((val.match(/\./g) || []).length > 1) {
                 el.value = val.substring(0, val.lastIndexOf('.'));
                 return;
             }
 
-            // Check boundaries safely if input string is fully finished typing
             if (val !== '' && val !== '.') {
                 let num = parseFloat(val);
                 if (!isNaN(num) && num > maxVal) {
@@ -685,33 +687,34 @@
         // --- 4. SGPA CALCULATOR LOGIC ---
         function handleSgpaInput(el, subjectId) {
             let errorDiv = document.getElementById(`error-sgpa-${subjectId}`);
-            let val = el.value;
+            let val = el.value.trim().toUpperCase();
             
-            if (/[^0-9.]/.test(val)) {
-                el.value = val.replace(/[^0-9.]/g, '');
-                errorDiv.innerText = "Letters strictly not allowed.";
-                errorDiv.style.display = 'block';
+            // Allow matching letter grades or number ranges safely
+            if (val === '') {
+                el.classList.remove('error');
+                errorDiv.style.display = 'none';
                 return;
             }
 
-            if ((val.match(/\./g) || []).length > 1) {
-                el.value = val.substring(0, val.lastIndexOf('.'));
-                return;
-            }
-            
-            if (val !== '' && val !== '.') {
-                let num = parseFloat(val);
-                if (!isNaN(num) && num > 10) {
-                    el.classList.add('error');
-                    errorDiv.innerText = "Grade cannot exceed 10!";
-                    errorDiv.style.display = 'block';
-                } else {
-                    el.classList.remove('error');
-                    errorDiv.style.display = 'none';
-                }
-            } else {
+            // Check if it's a valid letter grade or a valid numeric grade point (0-10)
+            if (gradeMap.hasOwnProperty(val)) {
                 el.classList.remove('error');
                 errorDiv.style.display = 'none';
+            } else {
+                let num = parseFloat(val);
+                if (!isNaN(num) && num >= 0 && num <= 10) {
+                    // Check if it's a structural double decimal point typo
+                    if ((val.match(/\./g) || []).length > 1) {
+                        el.value = val.substring(0, val.lastIndexOf('.'));
+                        return;
+                    }
+                    el.classList.remove('error');
+                    errorDiv.style.display = 'none';
+                } else {
+                    el.classList.add('error');
+                    errorDiv.innerText = "Enter valid grade (O, A+, A...) or points (0-10)!";
+                    errorDiv.style.display = 'block';
+                }
             }
         }
 
@@ -727,7 +730,7 @@
                         <div class="sgpa-row">
                             <span>${sub} (${creditVal} Cr)</span>
                             <div>
-                                <input type="text" inputmode="decimal" class="sgpa-grade-input" data-credits="${creditVal}" placeholder="e.g. 9.5" oninput="handleSgpaInput(this, ${index})">
+                                <input type="text" class="sgpa-grade-input" data-credits="${creditVal}" placeholder="e.g. A+ or 9" oninput="handleSgpaInput(this, ${index})">
                             </div>
                         </div>
                         <div id="error-sgpa-${index}" class="inline-error" style="text-align: right; margin-bottom: 0;"></div>
@@ -748,14 +751,33 @@
             const inputs = document.querySelectorAll('.sgpa-grade-input');
             let totalCredits = 0;
             let totalPoints = 0;
+            let hasEmptyFields = false;
 
             inputs.forEach(input => {
+                let val = input.value.trim().toUpperCase();
+                if (val === '') {
+                    hasEmptyFields = true;
+                    return;
+                }
+
                 let credits = parseInt(input.getAttribute('data-credits'));
-                let gradePoints = parseFloat(input.value) || 0; 
+                let gradePoints = 0;
+
+                if (gradeMap.hasOwnProperty(val)) {
+                    gradePoints = gradeMap[val];
+                } else {
+                    gradePoints = parseFloat(val) || 0;
+                }
                 
                 totalCredits += credits;
                 totalPoints += (credits * gradePoints);
             });
+
+            if (hasEmptyFields) {
+                globalError.innerText = "Please fill in all the grade fields!";
+                globalError.style.display = 'block';
+                return;
+            }
 
             if(totalCredits === 0) return;
 
@@ -766,7 +788,7 @@
             document.getElementById('sgpaResultsBox').style.display = 'block';
             
             displayElement.className = 'blue-text';
-            if (parseFloat(sgpa) < 5.0) {
+            if (parseFloat(sgpa) < 4.0) { // RVCE passing CGPA threshold floor standard
                 displayElement.style.color = 'var(--error)';
             } else {
                 displayElement.style.color = 'var(--highlight)';
