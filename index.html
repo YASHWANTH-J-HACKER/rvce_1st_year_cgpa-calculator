@@ -652,7 +652,6 @@
 
             if (cieTotal > maxCie) cieTotal = maxCie;
 
-            // Handle informational label visibility for theory + lab combined subjects
             let noticeElement = document.getElementById('pblNoticeBlock');
             if (type === 'theory_lab') {
                 noticeElement.style.display = 'block';
@@ -713,6 +712,12 @@
         // --- 4. SGPA CALCULATOR LOGIC ---
         function handleSgpaInput(el, subjectId) {
             let errorDiv = document.getElementById(`error-sgpa-${subjectId}`);
+            
+            // Strictly block decimal points from ever being registered in the input box string
+            if (el.value.includes('.')) {
+                el.value = el.value.replace(/\./g, '');
+            }
+
             let val = el.value.trim().toUpperCase();
             
             if (val === '') {
@@ -726,17 +731,14 @@
                 el.classList.remove('error');
                 errorDiv.style.display = 'none';
             } else {
-                let num = parseFloat(val);
-                if (!isNaN(num) && num >= 0 && num <= 10) {
-                    if ((val.match(/\./g) || []).length > 1) {
-                        el.value = val.substring(0, val.lastIndexOf('.'));
-                        return;
-                    }
+                let num = parseInt(val, 10);
+                // Ensure it is a valid base-10 integer between 0 and 10 with no decimal formatting leakage
+                if (!isNaN(num) && num >= 0 && num <= 10 && String(num) === val) {
                     el.classList.remove('error');
                     errorDiv.style.display = 'none';
                 } else {
                     el.classList.add('error');
-                    errorDiv.innerText = "Enter valid grade (O, A+, A...) or points (0-10)!";
+                    errorDiv.innerText = "Enter valid letter grade (O, A+, A...) or integer points (0-10)!";
                     errorDiv.style.display = 'block';
                     document.getElementById('sgpaResultsBox').style.display = 'none';
                     return;
@@ -782,7 +784,7 @@
 
                 enteredFieldsCount++;
                 let credits = parseInt(input.getAttribute('data-credits'));
-                let gradePoints = gradeMap.hasOwnProperty(val) ? gradeMap[val] : (parseFloat(val) || 0);
+                let gradePoints = gradeMap.hasOwnProperty(val) ? gradeMap[val] : (parseInt(val, 10) || 0);
                 
                 totalCredits += credits;
                 totalPoints += (credits * gradePoints);
