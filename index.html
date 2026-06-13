@@ -226,6 +226,17 @@
             border-radius: 0 10px 10px 0;
             box-sizing: border-box;
         }
+
+        .pbl-notice {
+            background-color: #222210;
+            border: 1px dashed var(--primary);
+            padding: 8px 12px;
+            font-size: 13px;
+            color: #eee;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
         
         .grade-row {
             display: flex;
@@ -334,6 +345,9 @@
             
             <div class="results-box" id="cieResultsBox">
                 <h3>Calculation Results</h3>
+                <div class="pbl-notice" id="pblNoticeBlock">
+                    ⚠️ <strong>Note:</strong> This subject includes <strong>Theory + Lab + Project (PBL)</strong> components merged altogether. The targets shown below account for the combined 150-mark maximum evaluation scheme standard.
+                </div>
                 <p><strong id="cieScaleText">Your Total CIE:</strong> <span id="cieResult" class="blue-text">0</span></p>
                 <p><em>Minimum SEE Marks required to secure following grades:</em></p>
                 <div id="gradesList"></div>
@@ -475,6 +489,8 @@
                     el.classList.add('error');
                     errorDiv.innerText = `Marks cannot exceed ${maxVal}!`;
                     errorDiv.style.display = 'block';
+                    document.getElementById('cieResultsBox').style.display = 'none';
+                    return;
                 } else {
                     el.classList.remove('error');
                     errorDiv.style.display = 'none';
@@ -483,6 +499,8 @@
                 el.classList.remove('error');
                 errorDiv.style.display = 'none';
             }
+
+            calculateGrades();
         }
 
         function createInput(id, label, max) {
@@ -634,6 +652,14 @@
 
             if (cieTotal > maxCie) cieTotal = maxCie;
 
+            // Handle informational label visibility for theory + lab combined subjects
+            let noticeElement = document.getElementById('pblNoticeBlock');
+            if (type === 'theory_lab') {
+                noticeElement.style.display = 'block';
+            } else {
+                noticeElement.style.display = 'none';
+            }
+
             document.getElementById('cieScaleText').innerText = `Your Total CIE (Out of ${maxCie}):`;
             document.getElementById('cieResult').innerText = cieTotal.toFixed(1).replace(/\.0$/, '');
 
@@ -689,21 +715,19 @@
             let errorDiv = document.getElementById(`error-sgpa-${subjectId}`);
             let val = el.value.trim().toUpperCase();
             
-            // Allow matching letter grades or number ranges safely
             if (val === '') {
                 el.classList.remove('error');
                 errorDiv.style.display = 'none';
+                calculateSgpaDynamic();
                 return;
             }
 
-            // Check if it's a valid letter grade or a valid numeric grade point (0-10)
             if (gradeMap.hasOwnProperty(val)) {
                 el.classList.remove('error');
                 errorDiv.style.display = 'none';
             } else {
                 let num = parseFloat(val);
                 if (!isNaN(num) && num >= 0 && num <= 10) {
-                    // Check if it's a structural double decimal point typo
                     if ((val.match(/\./g) || []).length > 1) {
                         el.value = val.substring(0, val.lastIndexOf('.'));
                         return;
@@ -714,8 +738,12 @@
                     el.classList.add('error');
                     errorDiv.innerText = "Enter valid grade (O, A+, A...) or points (0-10)!";
                     errorDiv.style.display = 'block';
+                    document.getElementById('sgpaResultsBox').style.display = 'none';
+                    return;
                 }
             }
+
+            calculateSgpaDynamic();
         }
 
         function loadSgpaScreen() {
@@ -740,6 +768,44 @@
             });
         }
 
+        function calculateSgpaDynamic() {
+            if(document.querySelector('.sgpa-grade-input.error')) return;
+
+            const inputs = document.querySelectorAll('.sgpa-grade-input');
+            let totalCredits = 0;
+            let totalPoints = 0;
+            let enteredFieldsCount = 0;
+
+            inputs.forEach(input => {
+                let val = input.value.trim().toUpperCase();
+                if (val === '') return;
+
+                enteredFieldsCount++;
+                let credits = parseInt(input.getAttribute('data-credits'));
+                let gradePoints = gradeMap.hasOwnProperty(val) ? gradeMap[val] : (parseFloat(val) || 0);
+                
+                totalCredits += credits;
+                totalPoints += (credits * gradePoints);
+            });
+
+            if (enteredFieldsCount === 0 || totalCredits === 0) {
+                document.getElementById('sgpaResultsBox').style.display = 'none';
+                return;
+            }
+
+            let sgpa = (totalPoints / totalCredits).toFixed(2);
+            let displayElement = document.getElementById('sgpaResultDisplay');
+            displayElement.innerText = sgpa;
+            document.getElementById('sgpaResultsBox').style.display = 'block';
+            
+            if (parseFloat(sgpa) < 4.0) {
+                displayElement.style.color = 'var(--error)';
+            } else {
+                displayElement.style.color = 'var(--highlight)';
+            }
+            document.getElementById('sgpa-global-error').style.display = 'none';
+        }
+
         function calculateSgpa() {
             let globalError = document.getElementById('sgpa-global-error');
             if(document.querySelector('.sgpa-grade-input.error')) {
@@ -749,28 +815,10 @@
             }
 
             const inputs = document.querySelectorAll('.sgpa-grade-input');
-            let totalCredits = 0;
-            let totalPoints = 0;
             let hasEmptyFields = false;
 
             inputs.forEach(input => {
-                let val = input.value.trim().toUpperCase();
-                if (val === '') {
-                    hasEmptyFields = true;
-                    return;
-                }
-
-                let credits = parseInt(input.getAttribute('data-credits'));
-                let gradePoints = 0;
-
-                if (gradeMap.hasOwnProperty(val)) {
-                    gradePoints = gradeMap[val];
-                } else {
-                    gradePoints = parseFloat(val) || 0;
-                }
-                
-                totalCredits += credits;
-                totalPoints += (credits * gradePoints);
+                if (input.value.trim() === '') hasEmptyFields = true;
             });
 
             if (hasEmptyFields) {
@@ -779,22 +827,7 @@
                 return;
             }
 
-            if(totalCredits === 0) return;
-
-            let sgpa = (totalPoints / totalCredits).toFixed(2);
-            let displayElement = document.getElementById('sgpaResultDisplay');
-            displayElement.innerText = sgpa;
-            
-            document.getElementById('sgpaResultsBox').style.display = 'block';
-            
-            displayElement.className = 'blue-text';
-            if (parseFloat(sgpa) < 4.0) { // RVCE passing CGPA threshold floor standard
-                displayElement.style.color = 'var(--error)';
-            } else {
-                displayElement.style.color = 'var(--highlight)';
-            }
-            
-            globalError.style.display = 'none';
+            calculateSgpaDynamic();
         }
 
     </script>
